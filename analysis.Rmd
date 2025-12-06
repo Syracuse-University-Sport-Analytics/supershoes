@@ -1,0 +1,203 @@
+---
+title: "Best Marathon Visuals"
+author: "Brandon Parikh and Justin Ehrlich"
+date: "2025-09-08"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+# Loading Libraries
+```{r}
+library(tidyverse)
+library(ggplot2)
+library(ggridges)
+library(lubridate)
+```
+
+#Loading in CSV Files
+```{r}
+mens_data <- read_csv("data/mens_data.csv")
+mens_t100_messy <- read_csv("data/new_top100.csv")
+womens_data <- read_csv("data/womens_data.csv")
+womens_t100_messy <- read_csv("data/top100_women.csv")
+```
+
+
+
+```{r}
+mens_data %>% mutate(category = "Men", women = 0) %>% bind_rows(
+  womens_data %>% mutate(category = "Women", women = 1)) %>% mutate(year = Year) %>% filter(year > 2010,year != 2020)   %>% mutate(era = ifelse(frac_year > 2016.72, "Supershoe Era", "Pre-Supershoe Era"))-> all_data
+
+mens_t100_messy %>% mutate(frac_year = dmy(paste0(date,"-",year))) %>% mutate(frac_year = year(frac_year) + (yday(frac_year)-1)/365)  %>% mutate(category = "Men", women = 0, frac = as.numeric(frac), frac_year = as.numeric(frac_year)) %>% bind_rows(
+  womens_t100_messy %>% mutate(category = "Women", women = 1, frac = as.numeric(frac), frac_year = as.numeric(frac_year), time_s = time))  %>% filter(year > 2010,year != 2020) %>% 
+  mutate(supershoe_era = ifelse(frac_year > 2016.72, 1, 0))  %>% mutate(era = ifelse(frac_year > 2016.72, "Supershoe Era", "Pre-Supershoe Era"))%>% 
+  mutate(after_2020 = ifelse(year >= 2020, 1, 0)) -> t100_all_data
+
+```
+
+
+```{r}
+
+pdf("visualizations/exploratory_plots.pdf")
+
+
+t100_all_data %>% mutate(year = as.character(year)) %>% ggplot(aes(x=time_s, fill = category, y = year)) + geom_density_ridges() + theme_bw() + scale_fill_manual(values = c("blue", "red")) + labs(x = "Time (seconds)", y = "Year")
+
+
+
+#standardize time_s
+t100_all_data %>% group_by(category) %>%  mutate(time_s_sd = (time_s - mean(time_s))/sd(time_s)) %>%  ggplot(aes(x=time_s_sd, y = frac_year)) + geom_bin2d() +
+  scale_fill_continuous(type = "viridis") +
+  theme_dark() + facet_grid(cols = vars(category)) 
+
+(t100_all_data %>% group_by(category) %>%  mutate(time_s_sd = (time_s - mean(time_s))/sd(time_s)) %>%  ggplot(aes(x=time_s_sd, y = frac_year)) + geom_hex() +
+  scale_fill_continuous(type = "viridis") +
+  theme_dark() + facet_grid(cols = vars(category)) + labs(x = "Time (standardized)", y =  "Year") -> figure1_a)
+
+t100_all_data %>% ggplot(aes(x=time_s, y = frac_year)) + geom_bin2d() +
+  scale_fill_continuous(type = "viridis") +
+  theme_dark() + facet_grid(cols = vars(category))
+
+t100_all_data %>% ggplot(aes(x=time_s, y = frac_year)) + geom_hex() +
+  scale_fill_continuous(type = "viridis") +
+  theme_dark() + facet_grid(cols = vars(category))
+
+(t100_all_data %>% mutate(supershoe_era = ifelse(frac_year <= 2016.72, "Pre-Supershoe Era", ifelse(frac_year < 2020, "Supershoe Era", "Post 2020"))) %>%
+  ggplot(aes(x=frac_year, y = time_s, color = supershoe_era, shape = category)) + geom_point(alpha = 0.1) +
+  geom_smooth(method = "lm", formula = y ~ x) +
+  scale_color_manual(values = c("blue", "red", "magenta")) +
+  theme_bw() + labs(y = "Time (seconds)", x = "Year") -> figure1_b)
+
+t100_all_data %>% mutate(supershoe_era = ifelse(frac_year <= 2016.72, "Pre-Supershoe Era", ifelse(frac_year < 2020, "Supershoe Era", "Post 2020"))) %>%
+  ggplot(aes(x=frac_year, y = time_s, color = supershoe_era, shape = category)) + geom_point(alpha = 0.1) +
+  geom_smooth(method = "lm", formula = y ~ x + I(x^2)) +
+  scale_color_manual(values = c("blue", "red", "magenta")) +
+  theme_bw()
+
+
+t100_all_data%>% filter(year != 2020, !is.na(era)) %>%  mutate(year = as.character(year)) %>% ggplot(aes(x=time_s, fill = category, y = era)) + geom_density_ridges() + theme_bw() + scale_fill_manual(values = c("blue", "red"))
+
+dev.off()
+
+#combine figure_1_a and figure_1_b
+library(patchwork)
+figure1_a + figure1_b + plot_layout(ncol = 1)
+```
+
+
+
+
+
+
+
+
+
+```{r}
+
+
+
+t100_all_data %>% group_by(category, year) %>% mutate(quartile = as.character(ntile(time_s, 2))) -> t100_all_data
+
+
+t100_all_data %>% 
+  mutate(supershoe_era = ifelse(frac_year <= 2016.72, "Pre-Supershoe Era", ifelse(frac_year < 2020, "Supershoe Era", "Post 2020"))) %>%
+  ggplot(aes(x=frac_year, y = time_s, color = supershoe_era, shape = category)) + geom_point(alpha = 0.1) +
+  geom_smooth(method = "lm", formula = y ~ x) +
+  scale_color_manual(values = c("blue", "red", "magenta")) +
+  facet_wrap(~quartile) +
+  theme_bw()
+
+t100_all_data %>% group_by(category, year) %>% summarize(time_s_sd = sd(time_s)) %>% ungroup() %>%
+  mutate(supershoe_era = ifelse(year <= 2016.72, "Pre-Supershoe Era", ifelse(year < 2020, "Supershoe Era", "Post 2020"))) %>%
+  ggplot(aes(x=year, y = time_s_sd, color = supershoe_era, shape = category)) + geom_point(alpha = 0.1) +
+  geom_smooth(method = "lm", formula = y ~ x) +
+  scale_color_manual(values = c("blue", "red", "magenta")) +
+  theme_bw()
+```
+
+
+```{r}
+options(scipen=999)
+
+lm(formula = time_s ~ frac_year + supershoe_era + frac_year:supershoe_era  + after_2020 + venue + athlete, data = t100_all_data) -> fe_model
+
+lm(formula = time_s ~ frac_year + supershoe_era + frac_year:supershoe_era + frac_year:supershoe_era:category + category + after_2020 + venue + athlete, data = t100_all_data) -> interaction_fe_model
+
+lm(formula = time_s ~ poly(frac_year,2, raw=T) + supershoe_era + poly(frac_year,2, raw=T):supershoe_era + poly(frac_year,2, raw=T):supershoe_era:category + category + after_2020 + venue + athlete, data = t100_all_data) -> interaction_quad_fe_model
+
+lm(formula = time_s ~ quartile + frac_year:quartile + supershoe_era:quartile + frac_year:supershoe_era:quartile + frac_year:supershoe_era:category:quartile + category:quartile + after_2020:quartile + venue + athlete + poly(rank,2), data = t100_all_data ) -> interaction_quartile_fe_model
+
+library(stargazer)
+stargazer(interaction_fe_model, type = "html", omit = c("venue", "athlete"), out = "tables/interaction_fe_model.html")
+
+stargazer(fe_model,interaction_fe_model, type = "html", omit = c("venue", "athlete"), out = "tables/interaction_fe_model_comparisons.html")
+
+stargazer(interaction_quad_fe_model, type = "html", omit = c("venue", "athlete"), out = "tables/interaction_fe_quadratic_model.html")
+
+stargazer(interaction_quartile_fe_model, type = "html", omit = c("venue", "athlete"), out = "tables/interaction_fe_quartile_model.html")
+
+```
+
+```{r}
+#use ggeffects to create ME of frac_year, supershoe_era, and category
+library(ggeffects)
+pdf("visualizations/interaction_fe_model.pdf")
+ggeffects::ggpredict(interaction_fe_model, terms = c("frac_year", "supershoe_era", "category")) -> pred
+plot(pred) + theme_bw() + ggtitle("") + labs(y = "Predicted Time (seconds)", x = "Year")
+
+ggeffects::ggpredict(interaction_quad_fe_model, terms = c("frac_year", "supershoe_era", "category")) -> pred
+plot(pred) + theme_bw()
+
+dev.off()
+```
+
+
+```{r}
+library(lme4)
+
+lmer(formula = time_s ~ frac_year + supershoe_era + frac_year:supershoe_era  + after_2020 + venue + (1|athlete), data = t100_all_data) -> mixed_model
+
+lmer(formula = time_s ~ frac_year + supershoe_era + frac_year:supershoe_era + frac_year:supershoe_era:category + category + after_2020 + venue + (1|athlete), data = t100_all_data) -> interaction_mixed_model
+
+
+
+stargazer(mixed_model,interaction_mixed_model, type = "html", omit = c("venue", "athlete"), out = "tables/interaction_mixed_model_comparisons.html")
+```
+
+
+
+
+```{r}
+library(ggeffects)
+pdf("visualizations/interaction_mixed_model.pdf")
+# Get predictions
+pred <- ggeffects::ggpredict(interaction_mixed_model,  
+                              terms = c("frac_year", "supershoe_era", "category"))
+
+# Convert to data frame and filter
+library(dplyr)
+pred_filtered <- as.data.frame(pred) %>%
+  filter((group == "0" & x <= 2016) | 
+         (group == "1" & x >= 2016))
+
+# Convert back to ggeffects class for the plot method
+class(pred_filtered) <- c("ggeffects", "data.frame")
+attr(pred_filtered, "model.name") <- attr(pred, "model.name")
+
+# Plot
+plot(pred_filtered) + 
+  theme_bw() + 
+  ggtitle("") + 
+    labs(y = "Predicted Time (seconds)", 
+       x = "Year",
+       color = "Supershoe Era",
+       fill = "Supershoe Era")
+dev.off()
+```
+
+
+
