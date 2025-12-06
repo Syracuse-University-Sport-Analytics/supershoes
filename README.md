@@ -118,9 +118,6 @@ The analysis produces several key figures:
 1. World Athletics regulations on shoe technology (effective January 1, 2022)
 2. Nike Vaporfly and subsequent AFT developments (2016–present)
 
-## License
-
-[Add license information]
 
 ## Citation
 
