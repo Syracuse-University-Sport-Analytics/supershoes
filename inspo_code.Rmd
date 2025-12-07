@@ -1,0 +1,230 @@
+---
+title: "Marathon Inspo"
+author: "Brandon Parikh"
+date: "2025-12-04"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+```
+
+```{r}
+m <- 1609
+s <- 3600
+m_s_to_mph <- function(m,s){
+  (result <- ((m/1000)/(s/(3600))))
+}
+```
+
+```{r}
+library(tidyverse)
+
+# Function to convert m/s to km/h
+m_s_to_kmh <- function(distance, time_seconds) {
+  speed_ms <- distance / time_seconds
+  speed_kmh <- speed_ms * 3.6
+  return(speed_kmh)
+}
+
+WR_speeds_m <- c(m_s_to_kmh(100,9.58), m_s_to_kmh(200,19.19), m_s_to_kmh(400,43.03),
+                 m_s_to_kmh(800,100.91), m_s_to_kmh(1000,131.96), m_s_to_kmh(1500,206),
+                 m_s_to_kmh(1609.344,223.13), m_s_to_kmh(5000,755.36), m_s_to_kmh(10000,1571),
+                 m_s_to_kmh(21097.5,3402), m_s_to_kmh(21330,3600), m_s_to_kmh(42195,7235))
+
+# Convert distances from meters to kilometers
+distances_km <- c(100,200,400,800,1000,1500,1609.344,5000,10000,21097.5,21330,42195) / 1000
+
+WR <- tibble(WR_speeds_m, distances_km)
+WR <- WR %>% mutate(point_color = ifelse(distances_km == 42.195, "Marathon", "Other"))
+
+ggplot(WR, aes(distances_km, WR_speeds_m, color = point_color)) + 
+  geom_point(size = 1.1) +
+  scale_color_manual(values = c("Marathon" = "red", "Other" = "#1A1A1A")) +
+  geom_smooth(method = "lm", formula = y ~ I(log(x)), 
+              color = "orange", linewidth = 0.75, se = TRUE, alpha = 0.2) + 
+  ggtitle("Men's World Record Speeds by Distance",
+          subtitle = "Current World Records") + 
+  xlab("Distance (kilometers)") + 
+  ylab("World Record Speed (km/h)") +
+  theme_minimal(base_size = 14) +
+  theme(
+    plot.title = element_text(face = "bold", size = 18, hjust = 0.5, margin = margin(b = 5)),
+    plot.subtitle = element_text(size = 12, hjust = 0.5, color = "grey30", margin = margin(b = 15)),
+    axis.title = element_text(face = "bold", size = 13),
+    axis.text = element_text(size = 11, color = "grey20"),
+    panel.grid.major = element_line(color = "grey90", linewidth = 0.5),
+    panel.grid.minor = element_line(color = "grey95", linewidth = 0.3),
+    plot.background = element_rect(fill = "white", color = NA),
+    panel.background = element_rect(fill = "white", color = NA),
+    legend.position = "none",
+    plot.margin = margin(20, 20, 20, 20)
+  )
+
+
+ggsave("mens_world_records_current.png", 
+       width = 10, 
+       height = 7, 
+       units = "in",
+       dpi = 300)
+```
+
+```{r}
+library(tidyverse)
+
+# Function to convert m/s to km/h
+m_s_to_kmh <- function(distance, time_seconds) {
+  speed_ms <- distance / time_seconds
+  speed_kmh <- speed_ms * 3.6
+  return(speed_kmh)
+}
+
+WR_speeds_m <- c(m_s_to_kmh(100,9.58), m_s_to_kmh(200,19.19), m_s_to_kmh(400,43.03),
+                 m_s_to_kmh(800,100.91), m_s_to_kmh(1000,131.96), m_s_to_kmh(1500,206),
+                 m_s_to_kmh(1609.344,223.13), m_s_to_kmh(5000,757.35),
+                 m_s_to_kmh(10000,1577.53),
+                 m_s_to_kmh(21097.5,3503), m_s_to_kmh(21285,3600),
+                 m_s_to_kmh(42195,7377))
+
+# Convert distances from meters to kilometers
+distances_km <- c(100,200,400,800,1000,1500,1609.344,5000,10000,21097.5,21330,42195) / 1000
+
+WR <- tibble(WR_speeds_m, distances_km)
+WR <- WR %>% mutate(point_color = ifelse(distances_km == 42.195, "Marathon", "Other"))
+
+ggplot(WR, aes(distances_km, WR_speeds_m, color = point_color)) + 
+  geom_point(size = 1.1) +
+  scale_color_manual(values = c("Marathon" = "red", "Other" = "#1A1A1A")) +
+  geom_smooth(method = "lm", formula = y ~ I(log(x)), 
+              color = "#FF8C00", linewidth = 0.75, se = TRUE, alpha = 0.2) + 
+  ggtitle("Men's World Record Speeds by Distance",
+          subtitle = "World Records as of September 25, 2016") + 
+  xlab("Distance (kilometers)") + 
+  ylab("World Record Speed (km/h)") +
+  theme_minimal(base_size = 14) +
+  theme(
+    plot.title = element_text(face = "bold", size = 18, hjust = 0.5, margin = margin(b = 5)),
+    plot.subtitle = element_text(size = 12, hjust = 0.5, color = "grey30", margin = margin(b = 15)),
+    axis.title = element_text(face = "bold", size = 13),
+    axis.text = element_text(size = 11, color = "grey20"),
+    panel.grid.major = element_line(color = "grey90", linewidth = 0.5),
+    panel.grid.minor = element_line(color = "grey95", linewidth = 0.3),
+    plot.background = element_rect(fill = "white", color = NA),
+    panel.background = element_rect(fill = "white", color = NA),
+    legend.position = "none",
+    plot.margin = margin(20, 20, 20, 20)
+  )
+
+ggsave("mens_world_records_old.png", 
+       width = 10, 
+       height = 7, 
+       units = "in",
+       dpi = 300)
+```
+
+```{r}
+library(tidyverse)
+
+m_s_to_kmh <- function(distance, time_seconds) {
+  speed_ms <- distance / time_seconds
+  speed_kmh <- speed_ms * 3.6
+  return(speed_kmh)
+}
+
+R_speeds_w <- c(m_s_to_kmh(100,10.49), m_s_to_kmh(200,21.34), m_s_to_kmh(400,47.60), 
+                 m_s_to_kmh(800,113.28), m_s_to_kmh(1000,148.28), m_s_to_kmh(1500,230.07),
+                 m_s_to_kmh(1609.344,252.56), m_s_to_kmh(3000,491.06), 
+                 m_s_to_kmh(3218.688,538.58), m_s_to_kmh(5000,851.15), 
+                 m_s_to_kmh(10000,1771.78), m_s_to_kmh(21097.5,3909), 
+                 m_s_to_kmh(18930,3600), m_s_to_kmh(42195,8125))
+
+distances_km <- c(100,200,400,800,1000,1500,1609.344,3000,3218.688,5000,10000,21097.5,18930,42195) / 1000
+
+WR <- tibble(WR_speeds_w = R_speeds_w, distances)
+WR <- WR %>% mutate(point_color = ifelse(distances == 42.195, "Marathon", "Other"))
+
+ggplot(WR, aes(distances_km, WR_speeds_w, color = point_color)) +
+  geom_point(size = 1.1) +
+  scale_color_manual(values = c("Marathon" = "red", "Other" = "#1A1A1A")) +
+  geom_smooth(method = "lm", formula = y ~ I(log(x)), 
+              color = "#FF8C00", linewidth = 0.75, se = TRUE, alpha = 0.15) + 
+  ggtitle("Women's World Record Speeds by Distance",
+          subtitle = "World Records as of September 25, 2016") + 
+  xlab("Distance (kilometers)") + 
+  ylab("World Record Speed (km/h)") +
+  theme_minimal(base_size = 14) +
+  theme(
+    plot.title = element_text(face = "bold", size = 18, hjust = 0.5, margin = margin(b = 5)),
+    plot.subtitle = element_text(size = 12, hjust = 0.5, color = "grey30", margin = margin(b = 15)),
+    axis.title = element_text(face = "bold", size = 13),
+    axis.text = element_text(size = 11, color = "grey20"),
+    panel.grid.major = element_line(color = "grey90", linewidth = 0.5),
+    panel.grid.minor = element_line(color = "grey95", linewidth = 0.3),
+    plot.background = element_rect(fill = "white", color = NA),
+    panel.background = element_rect(fill = "white", color = NA),
+    legend.position = "none",
+    plot.margin = margin(20, 20, 20, 20)
+  )
+
+ggsave("womens_world_records_current.png", 
+       width = 10, 
+       height = 7, 
+       units = "in",
+       dpi = 300)
+```
+
+```{r}
+library(tidyverse)
+
+m_s_to_kmh <- function(distance, time_seconds) {
+  speed_ms <- distance / time_seconds
+  speed_kmh <- speed_ms * 3.6
+  return(speed_kmh)
+}
+
+R_speeds_w <- c(m_s_to_kmh(100,10.49), m_s_to_kmh(200,21.34), m_s_to_kmh(400,47.60), 
+                 m_s_to_kmh(800,113.28), m_s_to_kmh(1000,148.28), m_s_to_kmh(1500,229.04),
+                 m_s_to_kmh(1609.344,247.64), m_s_to_kmh(3000,491.06), 
+                 m_s_to_kmh(3218.688,538.58), m_s_to_kmh(5000,840.21), 
+                 m_s_to_kmh(10000,1734), m_s_to_kmh(21097.5,3772), 
+                 m_s_to_kmh(18930,3600), m_s_to_kmh(42195,7796))
+distances <- c(100,200,400,800,1000,1500,1609.344,3000,3218.688,5000,10000,21097.5,18930,42195)/1000
+
+WR <- tibble(WR_speeds_w = R_speeds_w, distances)
+WR <- WR %>% mutate(point_color = ifelse(distances == 42.195, "Marathon", "Other"))
+
+ggplot(WR, aes(distances, WR_speeds_w, color = point_color)) +
+  geom_point(size = 1.1) +
+  scale_color_manual(values = c("Marathon" = "red", "Other" = "#1A1A1A")) +
+  geom_smooth(method = "lm", formula = y ~ I(log(x)), 
+              color = "#FF8C00", linewidth = 0.75, se = TRUE, alpha = 0.15) + 
+  ggtitle("Women's World Record Speeds by Distance",
+          subtitle = "Current World Records") + 
+  xlab("Distance (meters)") + 
+  ylab("World Record Speed (km/h)") +
+  theme_minimal(base_size = 14) +
+  theme(
+    plot.title = element_text(face = "bold", size = 18, hjust = 0.5, margin = margin(b = 5)),
+    plot.subtitle = element_text(size = 12, hjust = 0.5, color = "grey30", margin = margin(b = 15)),
+    axis.title = element_text(face = "bold", size = 13),
+    axis.text = element_text(size = 11, color = "grey20"),
+    panel.grid.major = element_line(color = "grey90", linewidth = 0.5),
+    panel.grid.minor = element_line(color = "grey95", linewidth = 0.3),
+    plot.background = element_rect(fill = "white", color = NA),
+    panel.background = element_rect(fill = "white", color = NA),
+    legend.position = "none",
+    plot.margin = margin(20, 20, 20, 20)
+  )
+
+ggsave("womens_world_records_old.png", 
+       width = 10, 
+       height = 7, 
+       units = "in",
+       dpi = 300)
+```
+
+

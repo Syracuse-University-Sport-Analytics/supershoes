@@ -10,7 +10,7 @@ This project investigates the effects of "supershoes"—running shoes featuring 
 
 - Brandon Parikh
 - Justin Ehrlich
-- Dan Griffiths
+- Dylan Griffiths
 - Shane Sanders
 
 ## Key Findings
@@ -23,17 +23,22 @@ This project investigates the effects of "supershoes"—running shoes featuring 
 ## Repository Structure
 
 ```
-├── analysis.Rmd          # Main analysis script (R Markdown)
+├── analysis.Rmd              # Main analysis script (R Markdown)
+├── inspo_code.Rmd            # World record speed-distance visualizations
 ├── data/
-│   ├── mens_data.csv         # Men's marathon data
-│   ├── womens_data.csv       # Women's marathon data
-│   ├── new_top100.csv        # Men's top-100 annual performances
-│   └── top100_women.csv      # Women's top-100 annual performances
-├── visualizations/       # Output directory for figures
+│   ├── mens_data.csv             # Men's marathon data
+│   ├── womens_data.csv           # Women's marathon data
+│   ├── new_top100.csv            # Men's top-100 annual performances
+│   └── top100_women.csv          # Women's top-100 annual performances
+├── visualizations/           # Output directory for figures
 │   ├── exploratory_plots.pdf
 │   ├── interaction_fe_model.pdf
-│   └── interaction_mixed_model.pdf
-├── tables/               # Output directory for regression tables
+│   ├── interaction_mixed_model.pdf
+│   ├── mens_world_records_current.png
+│   ├── mens_world_records_old.png
+│   ├── womens_world_records_current.png
+│   └── womens_world_records_old.png
+├── tables/                   # Output directory for regression tables
 │   ├── interaction_fe_model.html
 │   ├── interaction_fe_model_comparisons.html
 │   ├── interaction_fe_quadratic_model.html
@@ -73,6 +78,16 @@ time_s ~ frac_year + supershoe_era + frac_year:supershoe_era +
          frac_year:supershoe_era:category + category + after_2020 + 
          venue + athlete
 ```
+
+## World Record Speed-Distance Analysis
+
+`inspo_code.Rmd` visualizes the relationship between world record speeds and race distances (100m to marathon) for both men and women. The analysis compares current world records against pre-supershoe era records (as of September 25, 2016) to contextualize marathon performance within the broader landscape of elite running.
+
+A logarithmic model (`speed ~ log(distance)`) captures the expected decay in sustainable speed as distance increases. The marathon is highlighted to show where it falls relative to this fitted curve—providing visual evidence of whether marathon world records have improved disproportionately in the supershoe era.
+
+**Outputs**:
+- `mens_world_records_current.png` / `mens_world_records_old.png`
+- `womens_world_records_current.png` / `womens_world_records_old.png`
 
 ## Requirements
 
@@ -118,11 +133,12 @@ The analysis produces several key figures:
 1. World Athletics regulations on shoe technology (effective January 1, 2022)
 2. Nike Vaporfly and subsequent AFT developments (2016–present)
 
+## License
+
+[Add license information]
 
 ## Citation
 
-If you use this analysis in your work, please cite:
-
 ```
-Parikh, B., Ehrlich, J.,  Griffiths, D., & Sanders, S. (2025). Supershoe Effects on Elite Marathon Performance [Source code]. GitHub. https://github.com/Syracuse-University-Sport-Analytics/supershoes
+Parikh, B., Ehrlich, J., Griffiths, D., & Sanders, S. (2025). Supershoe Effects on Elite Marathon Performance [Source code]. GitHub. https://github.com/Syracuse-University-Sport-Analytics/supershoes
 ```
