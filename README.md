@@ -135,7 +135,7 @@ The analysis produces several key figures:
 
 ## License
 
-[Add license information]
+See [LICENSE](LICENSE) for details.
 
 ## Citation
 
