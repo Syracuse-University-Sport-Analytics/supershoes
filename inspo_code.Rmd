@@ -14,6 +14,7 @@ library(tidyverse)
 ```
 
 ```{r}
+#helper functions and constants
 m <- 1609
 s <- 3600
 m_s_to_mph <- function(m,s){
